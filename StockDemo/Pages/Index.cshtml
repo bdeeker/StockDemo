@@ -1,0 +1,70 @@
+@page
+@model IndexModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Price Checker</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <main class="container">
+
+        <header class="page-header">
+            <h1>Price Checker</h1>
+            <p>Live prices from two real APIs</p>
+        </header>
+
+        <!-- Bitcoin card -->
+        <section class="card">
+            <p class="label">Bitcoin <span class="source">from Coinbase</span></p>
+
+            @if (Model.Bitcoin.Success)
+            {
+                <p class="price">@(Model.Bitcoin.Price?.ToString("C"))</p>
+            }
+            else
+            {
+                <p class="error">@Model.Bitcoin.ErrorMessage</p>
+            }
+        </section>
+
+        <!-- Stock card -->
+        <section class="card">
+            <p class="label">Stock price <span class="source">from Alpha Vantage</span></p>
+
+            <form method="get" class="search">
+                <input asp-for="Symbol" placeholder="e.g. IBM" maxlength="10" autocomplete="off" />
+                <button type="submit">Get price</button>
+            </form>
+
+            @if (Model.Stock != null)
+            {
+                if (Model.Stock.Success)
+                {
+                    <p class="symbol">@Model.Stock.Name</p>
+                    <p class="price">@(Model.Stock.Price?.ToString("C"))</p>
+
+                    if (Model.Stock.Change.HasValue)
+                    {
+                        var isUp = Model.Stock.Change.Value >= 0;
+
+                        <p class="change @(isUp ? "up" : "down")">
+                            @(isUp ? "▲" : "▼") @(Math.Abs(Model.Stock.Change.Value).ToString("C")) (@Model.Stock.ChangePercent) today
+                        </p>
+                    }
+                }
+                else
+                {
+                    <p class="error">@Model.Stock.ErrorMessage</p>
+                }
+            }
+        </section>
+
+        <footer>Refresh the page for the latest prices.</footer>
+
+    </main>
+</body>
+</html>
